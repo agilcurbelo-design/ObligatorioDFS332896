@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import v1Routes from './v1/v1.routes.js';
 import notFoundMiddleware from './v1/middlewares/notFound.middleware.js';
 import { errorMiddleware } from './v1/middlewares/error.middleware.js';
+import connectDB from './v1/config/db.config.js';
 
 dotenv.config();
+await connectDB();
 
 const app = express();
 
