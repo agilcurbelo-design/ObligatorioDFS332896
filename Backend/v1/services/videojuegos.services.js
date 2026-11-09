@@ -1,6 +1,3 @@
-import cloudinary from '../config/cloudinary.js';
-import { uploadBufferToCloudinary } from '../utils/cloudinary.util.js';
-
 import axios from 'axios';
 import Videojuego from '../models/videojuegos.models.js';
 import Categoria from '../models/categorias.models.js';
@@ -65,16 +62,11 @@ export const crearVideojuego = async (data) => {
     if (!categoria) {
       throw construirError('La categoría seleccionada no existe', 404);
     }
-    const datosExternos = await obtenerDatosVideojuegoExterno(data.nombre);
-    const imagenCloudinary = await subirImagenDesdeRAWG(datosExternos.imagen);
-
     const videojuego = new Videojuego({
-      nombre: datosExternos.nombre,
-      descripcion: datosExternos.descripcion,
+      nombre: data.nombre,
+      descripcion: data.descripcion,
       precio: data.precio,
       categoria: categoria._id,
-      puntajeMetacritic: datosExternos.puntajeMetacritic,
-      imagen: imagenCloudinary,
     });
     await videojuego.save();
     return videojuego;
@@ -256,50 +248,3 @@ const mapearVideojuegoExterno = (juego) => ({
   imagen: juego.background_image || '',
   puntajeMetacritic: juego.metacritic ?? null,
 });
-
-//CLOUDINARY
-
-const subirImagenDesdeRAWG = async (urlImagen) => {
-  if (!urlImagen) {
-    return '';
-  }
-
-  const response = await axios.get(urlImagen, {
-    responseType: 'arraybuffer',
-  });
-
-  const buffer = Buffer.from(response.data);
-
-  const resultado = await uploadBufferToCloudinary(
-    cloudinary,
-    buffer,
-    {
-      resource_type: 'image',
-      folder: 'videojuegos',
-    }
-  );
-
-  return resultado.secure_url;
-};
-
-const obtenerDatosVideojuegoExterno = async (nombre) => {
-  const resultados = await buscarVideojuegosExternos(nombre);
-  const juego = resultados.resultados[0];
-
-  if (!juego) {
-    throw construirError('No se encontró el videojuego en la API externa', 404);
-  }
-
-  try {
-    const response = await axios.get(`${BASE_URL}/games/${juego.id}`, {
-      params: { key: process.env.RAWG_API_KEY },
-    });
-
-    return {
-      ...juego,
-      ...mapearVideojuegoExterno(response.data),
-    };
-  } catch (error) {
-    return juego;
-  }
-};

@@ -27,6 +27,7 @@ export const videojuegoCreateSchema = Joi.object({
     'string.empty': 'El nombre es obligatorio',
     'any.required': 'El nombre es obligatorio',
   }),
+  descripcion: Joi.string().trim().max(2000).allow('').optional(),
   precio: Joi.number().required().min(0).messages({
     'number.base': 'El precio debe ser numérico',
     'number.min': 'El precio debe ser mayor o igual a 0',

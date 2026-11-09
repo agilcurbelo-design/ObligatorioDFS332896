@@ -9,8 +9,8 @@ const videojuegoSchema = new mongoose.Schema(
     },
     descripcion: {
       type: String,
-      required: true,
       trim: true,
+      default: '',
     },
     precio: {
       type: Number,
