@@ -171,8 +171,8 @@ export const comprarVideojuego = async (usuarioId, videojuegoId, metodoPago) => 
     if (!videojuego) {
       throw construirError('Videojuego no encontrado', 404);
     }
-    if (usuario.plan === 'plus' && usuario.compras.length > 4) {
-      throw construirError('Usted ya tiene mas de 10 compras  realizadas, para hacer compras ilimitadas cambiece al plan Premium', 403);
+    if (usuario.plan === 'plus' && usuario.compras.length >= 10) {
+      throw construirError('Alcanzaste el límite de 10 compras del plan Plus. Cambiate al plan Premium para comprar sin límite.', 403);
     }
     if (usuario.compras.some((compra) => compra.videojuego.equals(videojuego._id))) {
       throw construirError('El videojuego ya fue comprado por este usuario', 409);
@@ -197,6 +197,9 @@ export const comprarVideojuego = async (usuarioId, videojuegoId, metodoPago) => 
       plan: usuario.plan,
       'compras.videojuego': { $ne: videojuego._id },
     };
+    if (usuario.plan === 'plus') {
+      condiciones['compras.9'] = { $exists: false };
+    }
     if (metodoPago === 'puntos') {
       condiciones.puntos = { $gte: puntosGastados };
     }
