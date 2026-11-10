@@ -8,7 +8,13 @@ export const obtenerUsuariosService = async () => {
 };
 
 export const obtenerUsuarioService = async (id) => {
-    const usuario = await Usuario.findById(id).select('-password');
+    const usuario = await Usuario.findById(id)
+        .select('-password')
+        .populate({
+            path: 'compras.videojuego',
+            select: 'nombre imagen precio categoria',
+            populate: { path: 'categoria', select: 'nombre' }
+        });
     return usuario;
 };
 
