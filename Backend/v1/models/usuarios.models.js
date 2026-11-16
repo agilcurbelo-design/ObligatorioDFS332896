@@ -10,7 +10,10 @@ const compraSchema = new mongoose.Schema({
     metodoPago: { type: String, enum: ["dinero", "puntos"], required: true },
     puntosGanados: { type: Number, required: true, min: 0, default: 0 },
     puntosGastados: { type: Number, required: true, min: 0, default: 0 },
-    fecha: { type: Date, default: Date.now }
+    fecha: { type: Date, default: Date.now },
+    // Campos editables por el usuario desde el frontend (modificar compra)
+    estado: { type: String, enum: ["pendiente", "jugando", "completado"], default: "pendiente" },
+    nota: { type: String, trim: true, maxlength: 200, default: "" }
 }, { _id: false });
 
 const usuarioSchema = new mongoose.Schema({
@@ -39,4 +42,4 @@ const usuarioSchema = new mongoose.Schema({
 
 const Usuario = mongoose.model("Usuario", usuarioSchema);
 
-export default Usuario;
+export default Usuario;

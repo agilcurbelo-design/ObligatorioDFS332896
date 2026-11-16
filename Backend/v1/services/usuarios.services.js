@@ -106,3 +106,56 @@ export const recomendarVideojuegoService = async (id) => {
         recomendacion
     };
 };
+const construirError = (message, status) => {
+    const error = new Error(message);
+    error.status = status;
+    return error;
+};
+
+// Elimina (devuelve) una compra del usuario y revierte los puntos que generó
+export const eliminarCompraService = async (id, videojuegoId) => {
+    const usuario = await Usuario.findById(id).select('puntos compras');
+    if (!usuario) {
+        throw construirError("Usuario no encontrado", 404);
+    }
+
+    const compra = usuario.compras.find((item) => item.videojuego.equals(videojuegoId));
+    if (!compra) {
+        throw construirError("La compra no existe", 404);
+    }
+
+    // Si pagó con puntos se le devuelven; si ganó puntos con la compra se le descuentan
+    const puntos = Math.max(0, usuario.puntos + compra.puntosGastados - compra.puntosGanados);
+
+    await Usuario.updateOne(
+        { _id: id },
+        { $pull: { compras: { videojuego: videojuegoId } }, $set: { puntos } }
+    );
+
+    return { videojuegoId, puntos };
+};
+
+// Modifica los datos editables de una compra (estado y nota)
+export const modificarCompraService = async (id, videojuegoId, datos) => {
+    const cambios = {};
+    if (datos.estado !== undefined) cambios['compras.$.estado'] = datos.estado;
+    if (datos.nota !== undefined) cambios['compras.$.nota'] = datos.nota;
+
+    const usuario = await Usuario.findOneAndUpdate(
+        { _id: id, 'compras.videojuego': videojuegoId },
+        { $set: cambios },
+        { returnDocument: "after", runValidators: true }
+    )
+        .select('compras')
+        .populate({
+            path: 'compras.videojuego',
+            select: 'nombre imagen precio categoria',
+            populate: { path: 'categoria', select: 'nombre' }
+        });
+
+    if (!usuario) {
+        throw construirError("La compra no existe", 404);
+    }
+
+    return usuario.compras.find((item) => String(item.videojuego?._id || item.videojuego) === videojuegoId);
+};

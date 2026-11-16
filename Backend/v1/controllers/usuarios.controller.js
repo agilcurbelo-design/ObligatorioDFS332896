@@ -4,7 +4,9 @@ import {
     modificarUsuarioService,
     cambiarPlanService,
     obtenerPuntosUsuarioService,
-    recomendarVideojuegoService
+    recomendarVideojuegoService,
+    eliminarCompraService,
+    modificarCompraService
 } from '../services/usuarios.services.js';
 
 export const obtenerUsuarios = async (req, res) => {
@@ -52,6 +54,28 @@ export const recomendarVideojuegoController = async (req, res, next) => {
         const resultado = await recomendarVideojuegoService(req.params.id);
 
         res.status(200).json(resultado);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const eliminarCompraController = async (req, res, next) => {
+    try {
+        const { id, videojuegoId } = req.validatedParams;
+        const resultado = await eliminarCompraService(id, videojuegoId);
+
+        res.status(200).json({ message: "Compra eliminada", ...resultado });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const modificarCompraController = async (req, res, next) => {
+    try {
+        const { id, videojuegoId } = req.validatedParams;
+        const compra = await modificarCompraService(id, videojuegoId, req.validatedBody);
+
+        res.status(200).json({ message: "Compra modificada", compra });
     } catch (error) {
         next(error);
     }

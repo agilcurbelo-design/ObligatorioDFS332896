@@ -6,14 +6,16 @@ import {
     modificarUsuario,
     cambiarPlan,
     obtenerPuntosUsuarioController,
-    recomendarVideojuegoController
+    recomendarVideojuegoController,
+    eliminarCompraController,
+    modificarCompraController
 }
 from '../controllers/usuarios.controller.js';
 
 import { authenticateMiddleware, requireAdminMiddleware, requireSelfOrAdminMiddleware } from '../middlewares/auth.middlewares.js';
 import { validateBodyMiddleware } from '../middlewares/validateBody.middleware.js';
 import { validateParamsMiddleware } from '../middlewares/validateParams.middleware.js';
-import { modificarUsuarioSchema,cambiarPlanSchema,usuarioIdParamSchema} 
+import { modificarUsuarioSchema,cambiarPlanSchema,usuarioIdParamSchema,compraParamSchema,modificarCompraSchema} 
 from '../validators/usuarios.validators.js';
 
 const router = express.Router({ mergeParams: true });
@@ -46,4 +48,17 @@ router.put('/cambiarPlan/:id/plan',authenticateMiddleware,
     validateBodyMiddleware(cambiarPlanSchema),cambiarPlan
 );
 
-export default router;
+router.put('/modificarCompra/:id/:videojuegoId', authenticateMiddleware,
+    validateParamsMiddleware(compraParamSchema),
+    requireSelfOrAdminMiddleware,
+    validateBodyMiddleware(modificarCompraSchema),
+    modificarCompraController
+);
+
+router.delete('/eliminarCompra/:id/:videojuegoId', authenticateMiddleware,
+    validateParamsMiddleware(compraParamSchema),
+    requireSelfOrAdminMiddleware,
+    eliminarCompraController
+);
+
+export default router;

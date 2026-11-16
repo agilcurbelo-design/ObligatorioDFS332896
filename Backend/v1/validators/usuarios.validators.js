@@ -25,3 +25,19 @@ export const cambiarPlanSchema = Joi.object({
 export const usuarioIdParamSchema = Joi.object({
     id: objectId.required(),
 });
+
+export const compraParamSchema = Joi.object({
+    id: objectId.required(),
+    videojuegoId: objectId.required(),
+});
+
+export const modificarCompraSchema = Joi.object({
+    estado: Joi.string().valid('pendiente', 'jugando', 'completado').messages({
+        'any.only': 'El estado debe ser pendiente, jugando o completado',
+    }),
+    nota: Joi.string().trim().allow('').max(200).messages({
+        'string.max': 'La nota no puede tener más de 200 caracteres',
+    }),
+}).min(1).messages({
+    'object.min': 'Debe enviar al menos un campo para modificar',
+});
